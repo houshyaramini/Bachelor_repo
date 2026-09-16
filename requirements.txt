@@ -1,0 +1,10 @@
+arch>=7.2,<9
+cvxpy>=1.6,<2
+joblib>=1.4,<2
+matplotlib>=3.9,<4
+mosek>=11,<12
+numpy>=2.0,<3
+pandas>=2.2,<4
+scipy>=1.14,<2
+seaborn>=0.13,<1
+statsmodels>=0.14,<1

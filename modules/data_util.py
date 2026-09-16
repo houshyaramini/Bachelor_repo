@@ -1,8 +1,9 @@
-import pandas as pd
-import numpy as np
-from arch import arch_model
 from dataclasses import dataclass
-from typing import Union, Optional
+from typing import Optional, Union
+
+import numpy as np
+import pandas as pd
+from arch import arch_model
 
 
 def daten_laden(Index, Derivate, RiskFreeRate):
@@ -94,7 +95,6 @@ def get_options_data(
 
 @dataclass
 class ReturnsData:
-
     log_d: pd.Series
     log_d_sqr: pd.Series
     log_m: pd.Series

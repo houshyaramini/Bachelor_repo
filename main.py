@@ -1,19 +1,17 @@
-import pandas as pd
-import numpy as np
-import cvxpy as cp
 import os
 import warnings
-import mosek
+
+import numpy as np
+import pandas as pd
 from joblib import Parallel, delayed
-from datetime import datetime
-from arch import arch_model
+
 from modules.config import SimulationConfig
 from modules.data_util import (
+    calculate_returns,
     daten_laden,
     get_options_data,
-    calculate_returns,
-    real_vola2,
     payoff_vektor,
+    real_vola2,
     vek_ret_long,
     vek_ret_short,
 )
@@ -26,7 +24,8 @@ warnings.filterwarnings(
 pd.set_option("display.float_format", "{:.3f}".format)
 
 
-def run_simulation(config: SimulationConfig = None):
+def run_simulation(config: SimulationConfig | None = None) -> None:
+    """Run the monthly bootstrap and portfolio optimization pipeline."""
 
     if config is None:
         config = SimulationConfig()
@@ -83,12 +82,6 @@ def run_simulation(config: SimulationConfig = None):
     sim_ret_array = np.stack([sim_vek_ret_long, sim_vek_ret_short], axis=-1)
 
     N_perioden = sim_ret_array.shape[0]
-    N_d_werte = sim_ret_array.shape[1]
-    N_assets = sim_ret_array.shape[3] * sim_ret_array.shape[4]
-    best_d = np.zeros(N_perioden, dtype=float)
-    best_util = np.full(N_perioden, -np.inf)
-    best_w_matrix = np.zeros((N_perioden, N_assets))
-
     print("Starte parallele Optimierung...")
 
     results = Parallel(n_jobs=config.n_jobs, verbose=10)(
@@ -112,20 +105,13 @@ def run_simulation(config: SimulationConfig = None):
 
     for i in range(N_perioden):
         start = options_data.StartDatumPeriode.iloc[i]
-        end = options_data.EndDatumPeriode.iloc[i]
-        rf_T_scalar = rf_t[i].item()
-        S_0_scalar = returns_data.start_prices.iloc[i]
-
-        best_expected_utility, best_d_index, best_weights, best_R = results[i]
+        _, best_d_index, best_weights, _ = results[i]
 
         if best_d_index < 0:
             best_d_value = np.nan
         else:
             best_d_value = config.d_window[int(best_d_index)]
         vol_scaler.append(best_d_value)
-
-        w = np.asarray(best_weights, dtype=float)
-        cash = 1.0 - np.sum(w[config.long_idx]) + np.sum(w[config.short_idx])
 
         all_best_weights.append(pd.Series(best_weights, index=cols, name=start))
     df_best_w_pro_t = pd.concat(all_best_weights, axis=1).T
@@ -137,6 +123,9 @@ def run_simulation(config: SimulationConfig = None):
     log_df["Seed"] = config.seed if config.use_seed else np.nan
     log_df = log_df.reset_index().rename(columns={"index": "Periode"})
 
+    log_directory = os.path.dirname(config.log_file)
+    if log_directory:
+        os.makedirs(log_directory, exist_ok=True)
     file_exists = os.path.isfile(config.log_file)
     log_df.to_csv(config.log_file, mode="a", index=False, header=not file_exists)
 

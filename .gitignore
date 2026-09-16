@@ -1,1 +1,27 @@
-/Struktur.txt
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Local research outputs
+results/*.csv
+results/*.log
+results/tmp/
+
+# Local notes
+Struktur.txt
+thesis.txt

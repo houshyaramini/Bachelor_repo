@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this repository, please cite the thesis below."
+title: "Optimal Option Portfolio Strategies on the S&P 500"
+type: thesis
+authors:
+  - family-names: Amini
+    given-names: Houshyar
+date-released: 2026-02-26
+repository-code: "https://github.com/houshyaramini/Bachelor_repo"
+abstract: >-
+  B.Sc. Economics thesis at the University of Freiburg replicating and
+  extending Optimal Option Portfolio Strategies with S&P 500 index options.
+keywords:
+  - quantitative finance
+  - option portfolio optimization
+  - CRRA utility
+  - bootstrap
+  - mixed-integer convex programming

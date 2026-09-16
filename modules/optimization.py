@@ -1,7 +1,7 @@
-import numpy as np
-import cvxpy as cp
-import mosek
 import warnings
+
+import cvxpy as cp
+import numpy as np
 
 warnings.filterwarnings(
     "ignore", message=".*Incorrect array format.*", category=UserWarning, module="mosek"
@@ -35,7 +35,6 @@ def optimize_with_mosek(
     short_only: bool = False,
     long_only: bool = False,
 ):
-    n_samples = returns.shape[0]
     n_assets = returns.shape[1]
     w = cp.Variable(n_assets)
     rf_t = float(rf.item())
@@ -56,9 +55,9 @@ def optimize_with_mosek(
     constraints.append(cp.sum(w[short_idx]) - cp.sum(w[long_idx]) <= max_diff)
     constraints.append((w[short_idx]) <= sB)
     constraints.append((w[long_idx]) <= lB)
-    if short_only == True:
+    if short_only:
         constraints.append(cp.sum(w[long_idx]) <= 0.0)
-    if long_only == True:
+    if long_only:
         constraints.append(cp.sum(w[short_idx]) <= 0.0)
     for i, (lb, ub) in enumerate(bounds):
         constraints.append(w[i] >= lb * x[i])
@@ -120,7 +119,7 @@ def optimize_period(i, rf_T, period_returns, config):
     max_diff = config.max_diff
     ##################################
     d1, d2, d3, d4 = period_returns.shape
-    if big_array == True:
+    if big_array:
         period_returns = period_returns.reshape(1, d1 * d2, d3, d4)
     ##############################
     N_d_werte = period_returns.shape[0]
@@ -160,12 +159,12 @@ def optimize_period(i, rf_T, period_returns, config):
                 max_diff=max_diff,
             )
             if result["success"]:
-                if use_crra == True:
+                if use_crra:
                     current_u = result["fun"]
                 else:
                     current_u = result["port"]
                 current_w = result["x"]
-                if worst_case == True:
+                if worst_case:
                     current_u = -current_u
             else:
                 current_u = -np.inf
